@@ -37,6 +37,7 @@ class GeneticAlgorithm extends Heuristic
         population = new Population(
                 populationGenerator.generatePopulation(tasks, populationSize, instanceProperties.getDueDate()));
         randomGenerator = new Random(seed);
+        tournamentSize = Math.max ( (int) (.1f*tasks.size()), 5);
     }
 
     GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Task> tasks,
@@ -47,7 +48,6 @@ class GeneticAlgorithm extends Heuristic
 
     GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Task> tasks, long seed) {
         this(instanceProperties, tasks, seed, new VShapePopulationGenerator(), 20);
-        tournamentSize = Math.max ( (int) (.1f*tasks.size()), 3);
     }
 
     public void generateNewPopulation(PopulationGenerator populationGenerator, int populationSize)
