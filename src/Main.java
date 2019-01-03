@@ -14,20 +14,21 @@ public class Main {
 
         GeneticAlgorithm heuristic = new GeneticAlgorithm(instanceProperties, populationGenerator.randomGenerator(tasks, populationSize));
 
-        final long TIME_LIMIT = instanceProperties.getN() * 100;
+        final long TIME_LIMIT = instanceProperties.getN() * 10000;
         long preparationTimeEnd = System.currentTimeMillis();
         long preparationTime = preparationTimeEnd - preparationTimeStart;
         int totalIterations = 0;
         while(System.currentTimeMillis() + preparationTime - preparationTimeEnd < TIME_LIMIT)
         {
-            //Thread.sleep(10);
             heuristic.generateNextGeneration();
             totalIterations++;
         }
         long executionTimeEnd = System.currentTimeMillis();
-        FileManager.saveToTextFile(heuristic.getPopulation().getFittest(instanceProperties.getDueDate()), instanceProperties);
+        final Individual best = heuristic.getPopulation().getFittest(instanceProperties.getDueDate());
+        FileManager.saveToTextFile(best, instanceProperties);
         long endTime = System.currentTimeMillis();
 
+        System.out.println(String.format("Best instance cost %d", CostCalculator.calculateCost(best, instanceProperties.getDueDate())));
         System.out.println(String.format("Preparation time %d", preparationTimeEnd - preparationTimeStart));
         System.out.println(String.format("Execution time %d", executionTimeEnd - preparationTimeEnd));
         System.out.println(String.format("Total iterations %d", totalIterations));

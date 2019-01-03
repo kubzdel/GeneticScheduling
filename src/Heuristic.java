@@ -28,7 +28,7 @@ class GeneticAlgorithm extends Heuristic
     private boolean elitism = true;
     private int elitismOffset = 0;
     private double crossoverRate = 0.8f;
-    private int tournamentSize = 5;
+    private int tournamentSize = 10;
     private Random randomGenerator;
 
     GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Individual> population, long seed) {
@@ -38,7 +38,7 @@ class GeneticAlgorithm extends Heuristic
 
     GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Individual> population) {
         this(instanceProperties, population, 0);
-        tournamentSize = (int) (.1f*population.size());
+        tournamentSize = Math.max ( (int) (.1f*population.size()), 3);
     }
 
     public void generateNextGeneration()
@@ -50,8 +50,7 @@ class GeneticAlgorithm extends Heuristic
         } else {
             elitismOffset = 0;
         }
-        for (int i = elitismOffset; i < newPopulation.getIndividuals().size(); i++) {
-            System.out.println(String.format("Creating %d individual, %d", i, getPopulation().getIndividuals().size()));
+        for (int i = elitismOffset; i < tournamentSize; i++) {
             Individual indiv1 = tournamentSelection(getPopulation(), tournamentSize);
             Individual indiv2 = tournamentSelection(getPopulation(), tournamentSize);
             Individual newIndiv = crossover(indiv1, indiv2);
