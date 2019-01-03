@@ -54,6 +54,7 @@ class GeneticAlgorithm extends Heuristic
             Individual indiv1 = tournamentSelection(getPopulation(), tournamentSize);
             Individual indiv2 = tournamentSelection(getPopulation(), tournamentSize);
             Individual newIndiv = crossover(indiv1, indiv2);
+            mutate(newIndiv);
             newPopulation.getIndividuals().add(i, newIndiv);
         }
     }
