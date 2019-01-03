@@ -1,16 +1,16 @@
 import java.util.ArrayList;
 
 public class Instance {
-    private Population population;
+    private ArrayList<Task> tasks;
     private InstanceProperties instanceProperties;
 
-    public Instance(ArrayList<Individual> population, InstanceProperties instanceProperties){
+    public Instance(ArrayList<Task> tasks, InstanceProperties instanceProperties){
         this.instanceProperties = instanceProperties;
-        this.population = new Population(population);
+        this.tasks = tasks;
     }
 
-    public Population getPopulation() {
-        return population;
+    public ArrayList<Task> getTasks() {
+        return tasks;
     }
 
     public InstanceProperties getInstanceProperties() {

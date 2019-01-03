@@ -4,16 +4,11 @@ import java.util.Comparator;
 import java.util.Random;
 
 abstract class Heuristic {
-    private Instance instance;
+    protected Instance instance;
 
-    Heuristic(InstanceProperties instanceProperties, ArrayList<Individual> population)
+    Heuristic(InstanceProperties instanceProperties, ArrayList<Task> tasks)
     {
-        instance = new Instance(population, instanceProperties);
-    }
-
-    public Population getPopulation()
-    {
-        return instance.getPopulation();
+        instance = new Instance(tasks, instanceProperties);
     }
 
     public InstanceProperties getInstanceProperties()
@@ -24,35 +19,51 @@ abstract class Heuristic {
 
 class GeneticAlgorithm extends Heuristic
 {
+    private Population population;
     private double mutationRate = .001f;
     private boolean elitism = true;
     private int elitismOffset = 0;
-    private double crossoverRate = 0.8f;
+    private double crossoverRate = 0.2f;
     private int tournamentSize = 10;
     private Random randomGenerator;
 
-    GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Individual> population, long seed) {
-        super(instanceProperties, population);
+    GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Task> tasks,
+                     long seed, PopulationGenerator populationGenerator, int populationSize) {
+        super(instanceProperties, tasks);
+        population = new Population(
+                populationGenerator.generatePopulation(tasks, populationSize, instanceProperties.getDueDate()));
         randomGenerator = new Random(seed);
     }
 
-    GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Individual> population) {
-        this(instanceProperties, population, 0);
-        tournamentSize = Math.max ( (int) (.1f*population.size()), 3);
+    GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Task> tasks,
+                     PopulationGenerator populationGenerator, int populationSize) {
+        this(instanceProperties, tasks, 0, populationGenerator, populationSize);
+    }
+
+    GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Task> tasks) {
+        this(instanceProperties, tasks, 0, new VShapePopulationGenerator(), 20);
+        tournamentSize = Math.max ( (int) (.1f*tasks.size()), 3);
+    }
+
+    public void generateNewPopulation(PopulationGenerator populationGenerator, int populationSize)
+    {
+        population = new Population(
+                populationGenerator.generatePopulation(instance.getTasks(), populationSize, getInstanceProperties().getDueDate())
+        );
     }
 
     public void generateNextGeneration()
     {
-        Population newPopulation = new Population(getPopulation().getIndividuals());
+        Population newPopulation = new Population(population.getIndividuals());
         if (elitism) {
-            newPopulation.getIndividuals().set(0, getPopulation().getFittest(getInstanceProperties().getDueDate()));
+            newPopulation.getIndividuals().set(0, population.getFittest(getInstanceProperties().getDueDate()));
             elitismOffset = 1;
         } else {
             elitismOffset = 0;
         }
         for (int i = elitismOffset; i < tournamentSize; i++) {
-            Individual indiv1 = tournamentSelection(getPopulation(), tournamentSize);
-            Individual indiv2 = tournamentSelection(getPopulation(), tournamentSize);
+            Individual indiv1 = tournamentSelection(population, tournamentSize);
+            Individual indiv2 = tournamentSelection(population, tournamentSize);
             Individual newIndiv = crossover(indiv1, indiv2);
             mutate(newIndiv);
             newPopulation.getIndividuals().add(i, newIndiv);
@@ -60,7 +71,7 @@ class GeneticAlgorithm extends Heuristic
     }
 
     private Individual tournamentSelection(Population population, int tournamentSize) {
-        Population tournament = new Population(getPopulation(), tournamentSize);
+        Population tournament = new Population(population, tournamentSize);
         for (int i = 0; i < tournamentSize; i++) {
             int randomId = (int) (Math.random() * population.getIndividuals().size());
             tournament.getIndividuals().add(i, population.getIndividuals().get(randomId));
@@ -92,5 +103,8 @@ class GeneticAlgorithm extends Heuristic
     }
 
 
-
+    public Population getPopulation()
+    {
+        return population;
+    }
 }
