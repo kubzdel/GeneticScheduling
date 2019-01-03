@@ -50,11 +50,11 @@ class VShapePopulationGenerator implements PopulationGenerator{
         int sum = 0;
         for(int i = 0; i < tasks.size();i++)
         {
+            sum += tasks.get(i).getProcTime();
             if(sum < dueDate)
             {
                 // add tasks sorted ascending by earliness as long as they don't exceed dueDate
                 finalList.add(tasks.get(i));
-                sum += tasks.get(i).getProcTime();
             } else {
                 // other task just sort descending by tardiness and add to the finalList
                 tasks.sort(new TaskTardinessComparator());
