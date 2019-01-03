@@ -27,7 +27,7 @@ public class Population {
         int cost = 0;
         for(Individual individual: individuals)
         {
-            int newCost = CostCalculator.calculateCost(individual, dueDate);
+            int newCost = individual.calculateFitness(dueDate);
             if(newCost < cost)
             {
                 cost = newCost;

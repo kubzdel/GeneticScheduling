@@ -25,6 +25,11 @@ public class Individual {
         return tasks.get(index);
     }
 
+    public int calculateFitness(int dueDate)
+    {
+        return CostCalculator.calculateCost(this, dueDate);
+    }
+
     @Override
     public String toString() {
         return tasks
