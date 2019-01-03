@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Main {
     public static void main(String args[]) throws IOException {
@@ -13,8 +14,9 @@ public class Main {
 
         instanceProperties.setSumPAndDueDate(tasks.stream().mapToInt(Task::getProcTime).sum());
 
-        GeneticAlgorithm heuristic = new GeneticAlgorithm(instanceProperties, tasks,
-                new VShapePopulationGenerator(), populationSize);
+        GeneticAlgorithm heuristic = new GeneticAlgorithm(instanceProperties, tasks, new Random().nextInt());
+        // create initial population
+        heuristic.generateNewPopulation(new VShapePopulationGenerator(), populationSize);
 
         final long TIME_LIMIT = instanceProperties.getN() * 100;
         long preparationTimeEnd = System.currentTimeMillis();

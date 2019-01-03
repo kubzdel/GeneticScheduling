@@ -40,8 +40,8 @@ class GeneticAlgorithm extends Heuristic
         this(instanceProperties, tasks, 0, populationGenerator, populationSize);
     }
 
-    GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Task> tasks) {
-        this(instanceProperties, tasks, 0, new VShapePopulationGenerator(), 20);
+    GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Task> tasks, long seed) {
+        this(instanceProperties, tasks, seed, new VShapePopulationGenerator(), 20);
         tournamentSize = Math.max ( (int) (.1f*tasks.size()), 3);
     }
 
