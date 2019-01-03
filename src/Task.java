@@ -9,4 +9,20 @@ public class Task {
         this.earlinessP = earlinessP;
         this.tardinessP = tardinessP;
     }
+
+    public int getProcTime() {
+        return procTime;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public int getEarlinessP() {
+        return earlinessP;
+    }
+
+    public int getTardinessP() {
+        return tardinessP;
+    }
 }

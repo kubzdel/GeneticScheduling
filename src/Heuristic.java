@@ -1,60 +1,96 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Random;
 
-public class Heuristic {
+abstract class Heuristic {
+    private Instance instance;
 
-    private double totalTime;
-    private int d;
-    private int size;
-    private ArrayList<Task[]>population = new ArrayList<>();
-
-
-    public static void swap(Task[] arr, int i, int j) {
-        Task temp = arr[i];
-        arr[i]= arr[j];
-        arr[j] = temp;
+    Heuristic(InstanceProperties instanceProperties, ArrayList<Individual> population)
+    {
+        instance = new Instance(population, instanceProperties);
     }
 
-    public void loadFile(String n, int k, double h,int populationSize) throws IOException {
-        Path cwd = FileSystems.getDefault().getPath("benchmarks").toAbsolutePath();
-        File file = new File(cwd.toString() + "/sch" + n + ".txt");
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        double SUM_P = 0;
-        br.readLine().trim();
-        for (int curr = 1; curr < k; curr++) {
-            String size = br.readLine().trim();
-            for (int i = 0; i < Integer.parseInt(size); i++)
-                br.readLine();
+    public Population getPopulation()
+    {
+        return instance.getPopulation();
+    }
+
+    public InstanceProperties getInstanceProperties()
+    {
+        return instance.getInstanceProperties();
+    }
+}
+
+class GeneticAlgorithm extends Heuristic
+{
+    private double mutationRate = .001f;
+    private boolean elitism = true;
+    private int elitismOffset = 0;
+    private double crossoverRate = 0.8f;
+    private int tournamentSize = 5;
+    private Random randomGenerator;
+
+    GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Individual> population, long seed) {
+        super(instanceProperties, population);
+        randomGenerator = new Random(seed);
+    }
+
+    GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Individual> population) {
+        this(instanceProperties, population, 0);
+        tournamentSize = (int) (.1f*population.size());
+    }
+
+    public void generateNextGeneration()
+    {
+        Population newPopulation = new Population(getPopulation().getIndividuals());
+        if (elitism) {
+            newPopulation.getIndividuals().set(0, getPopulation().getFittest(getInstanceProperties().getDueDate()));
+            elitismOffset = 1;
+        } else {
+            elitismOffset = 0;
         }
-        int size = Integer.parseInt(br.readLine().trim());
-        this.size = size;
-        Task[] individual = new Task[size];
-        for (int i = 0; i < size; i++) {
-            String st = br.readLine();
-            String[] data = st.split(" +");
-            int procTime = Integer.parseInt(data[1]);
-            int earliness = Integer.parseInt(data[2]);
-            int tardiness = Integer.parseInt(data[3]);
-            SUM_P += procTime;
-            Task task = new Task(i , procTime, earliness, tardiness);
-            individual[i] = task;
+        for (int i = elitismOffset; i < newPopulation.getIndividuals().size(); i++) {
+            System.out.println(String.format("Creating %d individual, %d", i, getPopulation().getIndividuals().size()));
+            Individual indiv1 = tournamentSelection(getPopulation(), tournamentSize);
+            Individual indiv2 = tournamentSelection(getPopulation(), tournamentSize);
+            Individual newIndiv = crossover(indiv1, indiv2);
+            newPopulation.getIndividuals().add(i, newIndiv);
         }
-        Random rand = new Random();
-        for(int m=0;m<populationSize;m++) //duplikacja i przemieszanie
-            for(int i=0;i<size;i++){
-                swap(individual, rand.nextInt(size),rand.nextInt(size));
-                population.add(individual);
+    }
+
+    private Individual tournamentSelection(Population population, int tournamentSize) {
+        Population tournament = new Population(getPopulation(), tournamentSize);
+        for (int i = 0; i < tournamentSize; i++) {
+            int randomId = (int) (Math.random() * population.getIndividuals().size());
+            tournament.getIndividuals().add(i, population.getIndividuals().get(randomId));
+        }
+        return tournament.getFittest(getInstanceProperties().getDueDate());
+    }
+
+    private void mutate(Individual individual) {
+        for (int i = 0; i < getInstanceProperties().getN(); i++) {
+            double p = (double)randomGenerator.nextInt(1000) / 1000;
+            if (p  <= mutationRate) {
+                Collections.swap(individual.getTasks(),
+                        randomGenerator.nextInt(individual.getTasks().size()),
+                        randomGenerator.nextInt(individual.getTasks().size()));
             }
-
-        this.d = (int) (SUM_P * h);
-        this.totalTime = SUM_P;
+        }
     }
+
+    private Individual crossover(Individual individual1, Individual individual2) {
+        ArrayList<Task> newSolution = new ArrayList<>(individual1.getTasks().size());
+        for (int i = 0; i < individual1.getTasks().size(); i++) {
+            if (Math.random() <= crossoverRate) {
+                newSolution.add(i, individual1.getRandomTask());
+            } else {
+                newSolution.add(i, individual2.getRandomTask());
+            }
+        }
+        return new Individual(newSolution);
+    }
+
+
+
 }
