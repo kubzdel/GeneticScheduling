@@ -17,7 +17,7 @@ public class Main {
         GeneticAlgorithm heuristic = new GeneticAlgorithm(
                 instanceProperties, populationGenerator.generatePopulation(tasks, populationSize, instanceProperties.getDueDate()));
 
-        final long TIME_LIMIT = instanceProperties.getN() * 1000;
+        final long TIME_LIMIT = instanceProperties.getN() * 100;
         long preparationTimeEnd = System.currentTimeMillis();
         long preparationTime = preparationTimeEnd - preparationTimeStart;
         int totalIterations = 0;
