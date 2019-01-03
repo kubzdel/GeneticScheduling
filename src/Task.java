@@ -25,4 +25,9 @@ public class Task {
     public int getTardinessP() {
         return tardinessP;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%d. e: %d, t: %d, p: %d", id, earlinessP, tardinessP, procTime);
+    }
 }

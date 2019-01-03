@@ -27,7 +27,7 @@ public class InstanceProperties
 
     @Override
     public String toString() {
-        return String.format("n = %d, k = %d, h = %f", n, k, h);
+        return String.format("n = %d, k = %d, h = %f, due date = %d, sum = %d", n, k, h, dueDate, sumP);
     }
 
     public int getDueDate() {
@@ -38,11 +38,9 @@ public class InstanceProperties
         return sumP;
     }
 
-    public void setSumP(int sumP) {
-        this.sumP = sumP;
-    }
-
-    public void setDueDate(int dueDate) {
-        this.dueDate = dueDate;
+    public void setSumPAndDueDate(int sum)
+    {
+        sumP = sum;
+        dueDate = (int)(sum * h);
     }
 }

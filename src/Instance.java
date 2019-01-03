@@ -5,15 +5,6 @@ public class Instance {
     private InstanceProperties instanceProperties;
 
     public Instance(ArrayList<Individual> population, InstanceProperties instanceProperties){
-        int sumP = population
-                .get(0)
-                .getTasks()
-                .stream()
-                .mapToInt(Task::getProcTime)
-                .sum();
-        int dueDate = (int)(sumP * instanceProperties.getH());
-        instanceProperties.setSumP(sumP);
-        instanceProperties.setDueDate(dueDate);
         this.instanceProperties = instanceProperties;
         this.population = new Population(population);
     }

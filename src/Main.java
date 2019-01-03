@@ -9,12 +9,15 @@ public class Main {
             populationSize = Integer.parseInt(args[4]);
 
         final long preparationTimeStart = System.currentTimeMillis();
-        PopulationGenerator populationGenerator = new PopulationGenerator();
+        PopulationGenerator populationGenerator = new VShapePopulationGenerator();
         ArrayList<Task> tasks = FileManager.loadFromTextFile(instanceProperties);
 
-        GeneticAlgorithm heuristic = new GeneticAlgorithm(instanceProperties, populationGenerator.randomGenerator(tasks, populationSize));
+        instanceProperties.setSumPAndDueDate(tasks.stream().mapToInt(Task::getProcTime).sum());
 
-        final long TIME_LIMIT = instanceProperties.getN() * 10000;
+        GeneticAlgorithm heuristic = new GeneticAlgorithm(
+                instanceProperties, populationGenerator.generatePopulation(tasks, populationSize, instanceProperties.getDueDate()));
+
+        final long TIME_LIMIT = instanceProperties.getN() * 1000;
         long preparationTimeEnd = System.currentTimeMillis();
         long preparationTime = preparationTimeEnd - preparationTimeStart;
         int totalIterations = 0;
@@ -25,10 +28,11 @@ public class Main {
         }
         long executionTimeEnd = System.currentTimeMillis();
         final Individual best = heuristic.getPopulation().getFittest(instanceProperties.getDueDate());
+        final int bestCost = best.calculateFitness(instanceProperties.getDueDate());
         FileManager.saveToTextFile(best, instanceProperties);
         long endTime = System.currentTimeMillis();
 
-        System.out.println(String.format("Best instance cost %d", CostCalculator.calculateCost(best, instanceProperties.getDueDate())));
+        System.out.println(String.format("Best instance cost %d", bestCost));
         System.out.println(String.format("Preparation time %d", preparationTimeEnd - preparationTimeStart));
         System.out.println(String.format("Execution time %d", executionTimeEnd - preparationTimeEnd));
         System.out.println(String.format("Total iterations %d", totalIterations));
