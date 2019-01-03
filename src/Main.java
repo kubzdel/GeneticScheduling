@@ -24,7 +24,7 @@ public class Main {
         int totalIterations = 0;
         while(System.currentTimeMillis() + preparationTime - preparationTimeEnd < TIME_LIMIT)
         {
-            heuristic.generateNextGeneration();
+            heuristic.step();
             totalIterations++;
         }
         long executionTimeEnd = System.currentTimeMillis();

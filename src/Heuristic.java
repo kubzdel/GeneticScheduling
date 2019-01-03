@@ -11,6 +11,9 @@ abstract class Heuristic {
         instance = new Instance(tasks, instanceProperties);
     }
 
+    // method performed in each algorithm iteration
+    public abstract void step();
+
     public InstanceProperties getInstanceProperties()
     {
         return instance.getInstanceProperties();
@@ -25,6 +28,7 @@ class GeneticAlgorithm extends Heuristic
     private int elitismOffset = 0;
     private double crossoverRate = 0.2f;
     private int tournamentSize = 10;
+    private int populationSize = 20;
     private Random randomGenerator;
 
     GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Task> tasks,
@@ -38,6 +42,7 @@ class GeneticAlgorithm extends Heuristic
     GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Task> tasks,
                      PopulationGenerator populationGenerator, int populationSize) {
         this(instanceProperties, tasks, 0, populationGenerator, populationSize);
+        this.populationSize = populationSize;
     }
 
     GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Task> tasks, long seed) {
@@ -50,24 +55,36 @@ class GeneticAlgorithm extends Heuristic
         population = new Population(
                 populationGenerator.generatePopulation(instance.getTasks(), populationSize, getInstanceProperties().getDueDate())
         );
+        this.populationSize = populationSize;
     }
 
     public void generateNextGeneration()
     {
-        Population newPopulation = new Population(population.getIndividuals());
+        Population newPopulation = new Population();
+
+        elitism = randomGenerator.nextBoolean();
         if (elitism) {
-            newPopulation.getIndividuals().set(0, population.getFittest(getInstanceProperties().getDueDate()));
+            newPopulation.getIndividuals().add(population.getFittest(getInstanceProperties().getDueDate()));
             elitismOffset = 1;
         } else {
             elitismOffset = 0;
         }
-        for (int i = elitismOffset; i < tournamentSize; i++) {
+
+        for (int i = elitismOffset; i < populationSize; i++) {
+            // choose two individuals from 2 tournaments
             Individual indiv1 = tournamentSelection(population, tournamentSize);
             Individual indiv2 = tournamentSelection(population, tournamentSize);
+
+            // perform crossover over those two individuals
             Individual newIndiv = crossover(indiv1, indiv2);
+
+            // mutation on the new one
             mutate(newIndiv);
+
+            // add it to a new population
             newPopulation.getIndividuals().add(i, newIndiv);
         }
+        population = newPopulation;
     }
 
     private Individual tournamentSelection(Population population, int tournamentSize) {
@@ -106,5 +123,10 @@ class GeneticAlgorithm extends Heuristic
     public Population getPopulation()
     {
         return population;
+    }
+
+    @Override
+    public void step() {
+        generateNextGeneration();
     }
 }

@@ -4,6 +4,12 @@ import java.util.Collections;
 public class Population {
     private ArrayList<Individual> individuals;
 
+    public Population()
+    {
+        // just an empty population used when generating new ones
+        individuals = new ArrayList<>();
+    }
+
     public Population(ArrayList<Individual> population)
     {
         this.individuals = population;
