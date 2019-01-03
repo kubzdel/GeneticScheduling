@@ -35,6 +35,7 @@ public class Individual {
         return tasks
                 .stream()
                 .map(x -> Integer.toString(x.getId()))
+                .limit(20)
                 .collect(Collectors.joining(" "));
     }
 }
