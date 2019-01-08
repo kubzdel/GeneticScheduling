@@ -76,7 +76,7 @@ class GeneticAlgorithm extends Heuristic
             Individual indiv2 = tournamentSelection(population, tournamentSize);
 
             // perform crossover over those two individuals
-            Individual newIndiv = crossover(indiv1, indiv2);
+            Individual newIndiv = randomCrossover(indiv1, indiv2);
 
             // mutation on the new one
             mutate(newIndiv);
@@ -107,7 +107,7 @@ class GeneticAlgorithm extends Heuristic
         }
     }
 
-    private Individual crossover(Individual individual1, Individual individual2) {
+    private Individual randomCrossover(Individual individual1, Individual individual2) {
         ArrayList<Task> newSolution = new ArrayList<>(individual1.getTasks().size());
         for (int i = 0; i < individual1.getTasks().size(); i++) {
             if (Math.random() <= crossoverRate) {
@@ -119,6 +119,70 @@ class GeneticAlgorithm extends Heuristic
         return new Individual(newSolution);
     }
 
+    private Individual subParentCrossover(Individual individual1, Individual individual2) {
+        ArrayList<Task> newSolution = new ArrayList<>(individual1.getTasks().size());
+        
+        //1. Choose two parents P1 and P2.
+        // 2. Randomly generate two integers j and k from the uniform [1, n], with j<k.
+        // 3. Make child Ci, i = 1, 2 inherit the subsequence [j,... ,k] of its genes from P i.
+        // 4. Fill the remaining empty genes of Ci, according to their order of appearance
+        // in the second parent: if a gene is already inCi, reject it; else position it
+        // in the first empty gene in Ci.
+
+        // select two indices, such as i<j
+        int i = randomGenerator.nextInt(individual.getTasks().size());
+        int j = randomGenerator.nextInt(individual.getTasks().size());
+        if(i>j)
+        {
+            int temp = i;
+            i = j;
+            j = temp;
+        }
+
+        // make child inherit the subsequence [i...j] of its genes from individual1
+        for(int iter=i;iter<=j;iter++)
+        {
+            newSolution.add(iter, individual1[iter]);
+        }
+
+        // fill the remaining empty genes of the child with genes from individual2,
+        // preserving their order
+        for(int iter=0;individual2;iter++)
+        {
+            if(!newSolution.contains(individual2[iter]))
+            {
+                //put to the first empty slot
+                ;
+            }
+        }
+        
+        return new Individual(newSolution);
+    }
+
+    private Individual subParentCrossover(Individual individual1, Individual individual2) {
+        ArrayList<Task> newSolution = new ArrayList<>(individual1.getTasks().size());
+        
+        // select two indices, such as i<j
+        int i = randomGenerator.nextInt(individual.getTasks().size());
+        int j = randomGenerator.nextInt(individual.getTasks().size());
+        if(i>j)
+        {
+            int temp = i;
+            i = j;
+            j = temp;
+        }
+
+        // 1.Copy P1 into C1.
+        // 2. Randomly generate two integers j and k from the uniform [1, n], with j<k.
+
+        // 3. Swap all genes contained in the subsequence [j,... ,k] in P1 to their corres-
+        // ponding counterparts in P2.
+
+        // 4. To maintain the feasibility of C1, swap all genes of P2 contained in sub-
+        // sequence [j,... ,k] to their corresponding P1 counterparts in C1.
+        
+        return new Individual(newSolution);
+    }
 
     public Population getPopulation()
     {
