@@ -4,10 +4,11 @@ import java.util.Random;
 
 public class Main {
     public static void main(String args[]) throws IOException {
-        InstanceProperties instanceProperties = CMDArgumentsParser.Companion.validateArguments(args);
-        int populationSize = 20;
+        String aargs[]= {"10", "5", "0.6", "20"};
+        InstanceProperties instanceProperties = CMDArgumentsParser.Companion.validateArguments(aargs);
+        int populationSize = 500;
         if(args.length == 5)
-            populationSize = Integer.parseInt(args[4]);
+            populationSize = Integer.parseInt(aargs[4]);
 
         final long preparationTimeStart = System.currentTimeMillis();
         ArrayList<Task> tasks = FileManager.loadFromTextFile(instanceProperties);
