@@ -24,7 +24,7 @@ public class Main {
         long preparationTimeEnd = System.currentTimeMillis();
         long preparationTime = preparationTimeEnd - preparationTimeStart;
         int totalIterations = 0;
-        while(System.currentTimeMillis() + preparationTime - preparationTimeEnd < TIME_LIMIT)
+        while(System.currentTimeMillis() - preparationTimeEnd < TIME_LIMIT)
         {
             heuristic.step();
             System.out.println(heuristic.getPopulation().getFittest(instanceProperties.getDueDate()).calculateFitness(instanceProperties.getDueDate()));
