@@ -139,6 +139,7 @@ class GeneticAlgorithm extends Heuristic {
     }
     private Individual notWorstMutation(Individual individual, int maxNumberOfMutations, int dueDate){
         int initialIndividualCost = initialBestIndividual.calculateFitness(dueDate) ;
+        Individual toReturn = individual;
         for(int i = 0;i<maxNumberOfMutations;i++) {
             int dueDateTaskIndex = 0;
             int currTotalTime = 0;
@@ -160,12 +161,13 @@ class GeneticAlgorithm extends Heuristic {
                 if(newCost < initialIndividualCost) {
                     Individual newBestIndividual = new Individual(individualProposal);
                     initialBestIndividual = newBestIndividual;
-                    return newBestIndividual;
+                    toReturn = newBestIndividual;
+                    break;
                 }
 
             }
         }
-        return individual;
+        return toReturn;
     }
 
     private Individual subParentCrossover(Individual individual1, Individual individual2) {
