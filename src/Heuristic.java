@@ -24,6 +24,8 @@ class GeneticAlgorithm extends Heuristic {
     private int tournamentSize = 5;
     private int populationSize = 500;
     private Random randomGenerator;
+    // best individual from 1st population
+    private Individual initialBestIndividual;
 
     GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Task> tasks,
                      long seed, PopulationGenerator populationGenerator, int populationSize) {
@@ -49,6 +51,7 @@ class GeneticAlgorithm extends Heuristic {
                 populationGenerator.generatePopulation(instance.getTasks(), populationSize, getInstanceProperties().getDueDate())
         );
         this.populationSize = populationSize;
+        initialBestIndividual = population.getFittest(getInstanceProperties().getDueDate());
     }
 
     public void generateNextGeneration() {
@@ -67,22 +70,14 @@ class GeneticAlgorithm extends Heuristic {
             Individual indiv1 = tournamentSelection(population, tournamentSize);
             Individual indiv2 = tournamentSelection(population, tournamentSize);
 
-            // perform crossover over those two individuals
-            // Individual newIndiv = crossover(indiv1, indiv2);
             Individual newIndiv = subParentCrossover(indiv1, indiv2);
 
 
             // mutation on the new one
-            mutationRate = 1;
-//            mutate(newIndiv, 1);
-            int bestCostAsFar = bestAsFar.calculateFitness(getInstanceProperties().getDueDate());
-            boolean costLowered = notWorstMutation(newIndiv, 8, getInstanceProperties().getDueDate(), bestCostAsFar); //(int)(getInstanceProperties().getN()*0.1)
+            newIndiv = notWorstMutation(newIndiv, 8, getInstanceProperties().getDueDate());
+
             // add it to a new population
             newPopulation.getIndividuals().add(i, newIndiv);
-            if(costLowered)
-            {
-                Collections.swap(newPopulation.getIndividuals(), 0, i);
-            }
         }
         population = newPopulation;
     }
@@ -107,10 +102,8 @@ class GeneticAlgorithm extends Heuristic {
         }
     }
 
-    private boolean notWorstMutation(Individual individual, int maxNumberOfMutations, int dueDate, int bestCostAsFar){
-        int initialIndividualCost = bestCostAsFar;//individual.calculateFitness(dueDate);
-        //System.out.println("Best initial " + bestCostAsFar);
-        boolean costLowered = false;
+    private Individual notWorstMutation(Individual individual, int maxNumberOfMutations, int dueDate){
+        int initialIndividualCost = initialBestIndividual.calculateFitness(dueDate) ;
         for(int i = 0;i<maxNumberOfMutations;i++) {
             int dueDateTaskIndex = 0;
             int currTotalTime = 0;
@@ -124,21 +117,20 @@ class GeneticAlgorithm extends Heuristic {
 
 
             int tasksIndexToSwap = randomGenerator.nextInt(dueDateTaskIndex);
-            for(int t = individual.getTasks().size()-1;t>tasksIndexToSwap;t--)
+            for(int t = individual.getTasks().size()-1;t>dueDateTaskIndex;t--)
             {
                 ArrayList<Task> individualProposal = new ArrayList<>(individual.getTasks());
                 Collections.swap(individualProposal, tasksIndexToSwap, t);
                 int newCost = CostCalculator.calculateCost(individualProposal, dueDate);
                 if(newCost < initialIndividualCost) {
-                    individual = new Individual(individualProposal);
-                    initialIndividualCost = newCost;
-                    costLowered = true;
-                    break;
+                    Individual newBestIndividual = new Individual(individualProposal);
+                    initialBestIndividual = newBestIndividual;
+                    return newBestIndividual;
                 }
 
             }
         }
-        return costLowered;
+        return individual;
     }
 
     private Individual crossover(Individual individual1, Individual individual2) {
