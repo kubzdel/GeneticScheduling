@@ -53,10 +53,10 @@ class GeneticAlgorithm extends Heuristic {
 
     public void generateNextGeneration() {
         Population newPopulation = new Population();
-
-        elitism = randomGenerator.nextBoolean();
+        Individual bestAsFar = population.getFittest(getInstanceProperties().getDueDate());
+        //elitism = randomGenerator.nextBoolean();
         if (elitism) {
-            newPopulation.getIndividuals().add(population.getFittest(getInstanceProperties().getDueDate()));
+            newPopulation.getIndividuals().add(bestAsFar);
             elitismOffset = 1;
         } else {
             elitismOffset = 0;
@@ -73,10 +73,16 @@ class GeneticAlgorithm extends Heuristic {
 
 
             // mutation on the new one
-            mutate(newIndiv);
-
+            mutationRate = 1;
+//            mutate(newIndiv, 1);
+            int bestCostAsFar = bestAsFar.calculateFitness(getInstanceProperties().getDueDate());
+            boolean costLowered = notWorstMutation(newIndiv, 8, getInstanceProperties().getDueDate(), bestCostAsFar); //(int)(getInstanceProperties().getN()*0.1)
             // add it to a new population
             newPopulation.getIndividuals().add(i, newIndiv);
+            if(costLowered)
+            {
+                Collections.swap(newPopulation.getIndividuals(), 0, i);
+            }
         }
         population = newPopulation;
     }
@@ -90,8 +96,8 @@ class GeneticAlgorithm extends Heuristic {
         return tournament.getFittest(getInstanceProperties().getDueDate());
     }
 
-    private void mutate(Individual individual) {
-        for (int i = 0; i < getInstanceProperties().getN(); i++) {
+    private void mutate(Individual individual, int numberOfMutations) {
+        for (int i = 0; i < numberOfMutations; i++) {
             double p = (double) randomGenerator.nextInt(1000) / 1000;
             if (p <= mutationRate) {
                 Collections.swap(individual.getTasks(),
@@ -99,6 +105,40 @@ class GeneticAlgorithm extends Heuristic {
                         randomGenerator.nextInt(individual.getTasks().size()));
             }
         }
+    }
+
+    private boolean notWorstMutation(Individual individual, int maxNumberOfMutations, int dueDate, int bestCostAsFar){
+        int initialIndividualCost = bestCostAsFar;//individual.calculateFitness(dueDate);
+        //System.out.println("Best initial " + bestCostAsFar);
+        boolean costLowered = false;
+        for(int i = 0;i<maxNumberOfMutations;i++) {
+            int dueDateTaskIndex = 0;
+            int currTotalTime = 0;
+            for (int j = 0; j < individual.getTasks().size(); j++) {
+                currTotalTime += individual.getTasks().get(j).getProcTime();
+                if (currTotalTime >= dueDate) {
+                    dueDateTaskIndex = j;
+                    break;
+                }
+            }
+
+
+            int tasksIndexToSwap = randomGenerator.nextInt(dueDateTaskIndex);
+            for(int t = individual.getTasks().size()-1;t>tasksIndexToSwap;t--)
+            {
+                ArrayList<Task> individualProposal = new ArrayList<>(individual.getTasks());
+                Collections.swap(individualProposal, tasksIndexToSwap, t);
+                int newCost = CostCalculator.calculateCost(individualProposal, dueDate);
+                if(newCost < initialIndividualCost) {
+                    individual = new Individual(individualProposal);
+                    initialIndividualCost = newCost;
+                    costLowered = true;
+                    break;
+                }
+
+            }
+        }
+        return costLowered;
     }
 
     private Individual crossover(Individual individual1, Individual individual2) {
