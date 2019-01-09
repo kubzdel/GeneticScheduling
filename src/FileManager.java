@@ -1,5 +1,6 @@
 import java.io.*;
 import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
@@ -42,6 +43,23 @@ class FileManager {
                 FileSystems.getDefault().getPath(directory).toAbsolutePath().toString(),
                 filename
         ).toFile();
+    }
+
+    public static ArrayList<Integer> loadBounds() throws IOException {
+        Path cwd = FileSystems.getDefault().getPath("benchmarks").toAbsolutePath();
+        File file = new File(cwd.toString() + "/newbounds.txt");
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String st;
+        ArrayList<Integer>bounds = new ArrayList<>();
+        while((st=br.readLine())!=null){
+            String splited[] = st.split("\t+");
+            for(int i=0;i<2;i++){
+                splited[i] = splited[i].replace("*","");
+                bounds.add(Integer.valueOf(splited[i]));
+            }
+        }
+        return bounds;
+
     }
 
     static final String inputDirectory = "benchmarks";
