@@ -30,7 +30,7 @@ public class Population {
     public Individual getFittest(int dueDate)
     {
         Individual fittestIndividual = individuals.get(0);
-        int cost = 0;
+        int cost = CostCalculator.calculateCost(fittestIndividual, dueDate);
         for(Individual individual: individuals)
         {
             int newCost = individual.calculateFitness(dueDate);
