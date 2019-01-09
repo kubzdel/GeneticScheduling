@@ -11,10 +11,14 @@ class RandomPopulationGenerator implements PopulationGenerator {
         for(int m=0; m<populationSize; m++) //duplikacja i przemieszanie
         {
             ArrayList<Task> tempTask = new ArrayList<>(tasks);
-            for(int i=0; i<rand.nextInt(tempTask.size()); i++){
-                Collections.swap(tempTask, rand.nextInt(tempTask.size()),rand.nextInt(tempTask.size()));
+            ArrayList<Task> newIndividual = new ArrayList<>();
+            for(int i=0; i<tasks.size(); i++){
+                Task temp = tempTask.get(rand.nextInt(tempTask.size()));
+                newIndividual.add(temp);
+                tempTask.remove(temp);
+
             }
-            population.add(new Individual(tempTask));
+            population.add(new Individual(newIndividual));
         }
         return population;
     }
@@ -26,27 +30,21 @@ class VShapePopulationGenerator implements PopulationGenerator{
         ArrayList<Individual> population = new ArrayList<>(populationSize);
 
         Individual firstIndividual = createKonradIndividual(tasks, dueDate);
-      //  Individual lastIndividual = createInitialIndividual(tasks,dueDate);
         Random rand = new Random();
-        // V-shape sorted list is on the first place
+        // Konrad sorted list is on the first place
         population.add(firstIndividual);
         for(int m=0;m<populationSize-1;m++)
         {
             ArrayList<Task> newTasksList = new ArrayList<>(firstIndividual.getTasks());
-           // ArrayList<Task> newTasksList2 = new ArrayList<>(lastIndividual.getTasks());
-            for(int i=0;i<rand.nextInt(populationSize);i++)
+            for(int i=0;i<rand.nextInt(populationSize)*10;i++)
             {
-                //random V shape
-                Collections.swap(newTasksList, rand.nextInt(tasks.size()), rand.nextInt(tasks.size()));
                 //random Konrad shape
-              //  Collections.swap(newTasksList2, rand.nextInt(tasks.size()), rand.nextInt(tasks.size()));
+                Collections.swap(newTasksList, rand.nextInt(tasks.size()), rand.nextInt(tasks.size()));
             }
             population.add(new Individual(newTasksList));
 
-          //  population.add(new Individual(newTasksList2));
         }
-        //Konrad sorted is on the last place
-     //   population.add(lastIndividual);
+       // System.out.println(firstIndividual.calculateFitness(dueDate));
         return population;
     }
 
@@ -92,27 +90,5 @@ class VShapePopulationGenerator implements PopulationGenerator{
         sortedTasks.addAll(tempA);
         return new Individual((sortedTasks));
     }
-    private Individual createInitialIndividual(ArrayList<Task> tasks, int dueDate)
-    {
-        tasks.sort(new TaskEarlinessComparator());
 
-        ArrayList<Task> finalList = new ArrayList<>();
-        int sum = 0;
-        for(int i = 0; i < tasks.size();i++)
-        {
-            sum += tasks.get(i).getProcTime();
-            if(sum < dueDate)
-            {
-                // add tasks sorted ascending by earliness as long as they don't exceed dueDate
-                finalList.add(tasks.get(i));
-            } else {
-                // other task just sort descending by tardiness and add to the finalList
-                tasks.sort(new TaskTardinessComparator());
-                Collections.reverse(tasks);
-                int elementsToTake = tasks.size() - finalList.size();
-                finalList.addAll(tasks.subList(0, elementsToTake));
-            }
-        }
-        return new Individual(finalList);
-    }
 }

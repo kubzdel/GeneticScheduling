@@ -1,12 +1,13 @@
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
 
 public class Main {
     public static void main(String args[]) throws IOException {
-        String aargs[]= {"10", "5", "0.6", "20"};
+        String aargs[]= {"100", "9", "0.4", "100"};
         InstanceProperties instanceProperties = CMDArgumentsParser.Companion.validateArguments(aargs);
-        int populationSize = 500;
+        int populationSize =100;
         if(args.length == 5)
             populationSize = Integer.parseInt(aargs[4]);
 
@@ -26,6 +27,7 @@ public class Main {
         while(System.currentTimeMillis() + preparationTime - preparationTimeEnd < TIME_LIMIT)
         {
             heuristic.step();
+            System.out.println(heuristic.getPopulation().getFittest(instanceProperties.getDueDate()).calculateFitness(instanceProperties.getDueDate()));
             totalIterations++;
         }
         long executionTimeEnd = System.currentTimeMillis();
