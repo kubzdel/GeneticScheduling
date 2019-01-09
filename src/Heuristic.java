@@ -79,7 +79,7 @@ class GeneticAlgorithm extends Heuristic {
 
 
             // mutation on the new one
-            newIndiv = notWorstMutation(newIndiv, 10, getInstanceProperties().getDueDate());
+            newIndiv = notWorstMutation(newIndiv, 1, getInstanceProperties().getDueDate());
 
             // sort V shape (p/a and p/b) with given probability)
             sortVnearD(newIndiv);
@@ -139,6 +139,7 @@ class GeneticAlgorithm extends Heuristic {
     }
     private Individual notWorstMutation(Individual individual, int maxNumberOfMutations, int dueDate){
         int initialIndividualCost = initialBestIndividual.calculateFitness(dueDate) ;
+        ArrayList<Integer> indexWithMutation = new ArrayList<>();
         Individual toReturn = individual;
         for(int i = 0;i<maxNumberOfMutations;i++) {
             int dueDateTaskIndex = 0;
@@ -153,6 +154,14 @@ class GeneticAlgorithm extends Heuristic {
 
 
             int tasksIndexToSwap = randomGenerator.nextInt(dueDateTaskIndex);
+
+            if(!indexWithMutation.contains(tasksIndexToSwap)){
+                indexWithMutation.add(tasksIndexToSwap);
+            } else {
+                // swap on that index has been already performed
+                continue;
+            }
+            numberOfTries++;
             for(int t = individual.getTasks().size()-1;t>dueDateTaskIndex;t--)
             {
                 ArrayList<Task> individualProposal = new ArrayList<>(individual.getTasks());
