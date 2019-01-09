@@ -31,6 +31,7 @@ class VShapePopulationGenerator implements PopulationGenerator{
 
         Individual firstIndividual = createKonradIndividual(tasks, dueDate);
         Random rand = new Random();
+        System.out.println("Initial cost from deterministic heuristic " + CostCalculator.calculateCost(firstIndividual, dueDate));
         // Konrad sorted list is on the first place
         population.add(firstIndividual);
         for(int m=0;m<populationSize-1;m++)
