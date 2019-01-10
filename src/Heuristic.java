@@ -17,13 +17,13 @@ abstract class Heuristic {
 
 class GeneticAlgorithm extends Heuristic {
     public Population population;
-    private double mutationRate = 0.1f;
+    private double mutationRate = 0.2f;
     private boolean elitism = true;
     private int elitismOffset = 0;
-    private double crossoverRate = 0.7f;
+    private double crossoverRate = 0.1f;
     private int tournamentSize = 5;
-    private int populationSize = 100;
-    private double VsortRate = 0.4f;
+    private int populationSize = 200;
+    private double VsortRate = 0.2f;
     private double lastBestScore = Double.MAX_VALUE;
     private int consecutiveSameScore = 0;
     private Random randomGenerator;
@@ -36,7 +36,7 @@ class GeneticAlgorithm extends Heuristic {
         population = new Population(
                 populationGenerator.generatePopulation(tasks, populationSize, instanceProperties.getDueDate()));
         randomGenerator = new Random(seed);
-        tournamentSize = 12;
+        tournamentSize = 5;
     }
 
     GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Task> tasks,
@@ -46,7 +46,7 @@ class GeneticAlgorithm extends Heuristic {
     }
 
     GeneticAlgorithm(InstanceProperties instanceProperties, ArrayList<Task> tasks, long seed) {
-        this(instanceProperties, tasks, seed, new VShapePopulationGenerator(), 100);
+        this(instanceProperties, tasks, seed, new VShapePopulationGenerator(), 200);
     }
 
     public void generateNewPopulation(PopulationGenerator populationGenerator, int populationSize) {
@@ -77,9 +77,8 @@ class GeneticAlgorithm extends Heuristic {
             // Individual newIndiv = crossover(indiv1, indiv2);
             Individual newIndiv = subParentCrossover(indiv1, indiv2);
 
-
             // mutation on the new one
-            newIndiv = notWorstMutation(newIndiv, 1, getInstanceProperties().getDueDate());
+            newIndiv = notWorstMutation(newIndiv, 8, getInstanceProperties().getDueDate());
 
             // sort V shape (p/a and p/b) with given probability)
             sortVnearD(newIndiv);
@@ -98,10 +97,12 @@ class GeneticAlgorithm extends Heuristic {
             else{
                 consecutiveSameScore++;
             }
-            if(consecutiveSameScore>=5){
+            if(consecutiveSameScore>=10){
                 for(Individual i : newPopulation.getIndividuals()){
                 konradMutation(i,bestAsFar);
+                sortVnearD(i);
                 }
+                lastBestScore = Double.MAX_VALUE;
             }
         population = newPopulation;
     }
@@ -124,19 +125,22 @@ class GeneticAlgorithm extends Heuristic {
 
     //swap one task before d with one after d
     private void konradMutation(Individual individual,Individual best) {
-        for(int i=0;i<100;i++){
-        if (!individual.equals(best)) {
-            int d = getInstanceProperties().getDueDate();
-            int startIndex = 0;
-            int startTime = 0;
-            while (startTime < d) {
-                startTime += individual.getTasks().get(startIndex).getProcTime();
-                startIndex++;
-            }
+        for(int i=0;i<5;i++) {
+            if (Math.random() <= mutationRate) {
+                if (!individual.equals(best)) {
+                    int d = getInstanceProperties().getDueDate();
+                    int startIndex = 0;
+                    int startTime = 0;
+                    while (startTime < d) {
+                        startTime += individual.getTasks().get(startIndex).getProcTime();
+                        startIndex++;
+                    }
 
-            Collections.swap(individual.getTasks(), randomGenerator.nextInt(startIndex),
-                    randomGenerator.nextInt(individual.getTasks().size() - startIndex) + startIndex);
-        }}
+                    Collections.swap(individual.getTasks(), randomGenerator.nextInt(startIndex),
+                            randomGenerator.nextInt(individual.getTasks().size() - startIndex) + startIndex);
+                }
+            }
+        }
     }
     private Individual notWorstMutation(Individual individual, int maxNumberOfMutations, int dueDate){
         int initialIndividualCost = initialBestIndividual.calculateFitness(dueDate) ;
@@ -162,7 +166,7 @@ class GeneticAlgorithm extends Heuristic {
                 // swap on that index has been already performed
                 continue;
             }
-            numberOfTries++;
+           // numberOfTries++;
             for(int t = individual.getTasks().size()-1;t>dueDateTaskIndex;t--)
             {
                 ArrayList<Task> individualProposal = new ArrayList<>(individual.getTasks());
@@ -243,7 +247,7 @@ class GeneticAlgorithm extends Heuristic {
                 startTime += individual.getTasks().get(startIndex).getProcTime();
                 startIndex++;
             }
-           // Collections.swap(individual.getTasks(),startIndex-1,startIndex);
+           Collections.swap(individual.getTasks(),startIndex-1,startIndex);
             int startSortEarliness = randomGenerator.nextInt(startIndex);
             individual.getTasks().subList(startSortEarliness, startIndex).sort(new TaskEarlTimeComparator());
             int endSortIndex = startIndex + (randomGenerator.nextInt(getInstanceProperties().getN() - startIndex));
